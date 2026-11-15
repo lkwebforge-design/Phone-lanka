@@ -2,18 +2,18 @@
 (()=>{
 'use strict';
 const db=window.supabase.createClient('https://ivacdswettainjderwwz.supabase.co','sb_publishable_BSGXyRFXfusvraBcA-nU0g_xxQqcyYe',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
-let shop=null,items=[],live={};
+let shop=null,items=[],live={},businessName='';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const msg=(s,bad=false)=>{const n=document.getElementById('plStatus');if(n){n.textContent=s;n.hidden=!s;n.style.color=bad?'#b42318':'#174b83';}};
 const user=async()=>{const r=await db.auth.getUser();if(r.error)throw r.error;return r.data.user;};
-const profile=async u=>{const m=u.user_metadata||{};const r=await db.from('seller_profiles').upsert({user_id:u.id,display_name:String(m.full_name||u.email.split('@')[0]).slice(0,80),phone:String(m.phone||'').slice(0,32)},{onConflict:'user_id'});if(r.error)throw r.error;};
+const profile=async u=>{const m=u.user_metadata||{};businessName=String(m.business_name||'').slice(0,80);const r=await db.from('seller_profiles').upsert({user_id:u.id,display_name:String(m.full_name||u.email.split('@')[0]).slice(0,80),phone:String(m.phone||'').slice(0,32)},{onConflict:'user_id'});if(r.error)throw r.error;};
 function auth(mode='signup'){
  const up=mode==='signup';
  openModal(up?'Create seller account':'Seller login',`
  <div class="pl-panel"><p class="pl-muted">Manage your own PhoneLanka shop and phone listings securely.</p>
  <div class="pl-tabs"><button class="pl-tab ${up?'active':''}" onclick="plAuth('signup')">Create account</button><button class="pl-tab ${!up?'active':''}" onclick="plAuth('login')">Log in</button></div>
  <form onsubmit="plAuthSubmit(event,'${mode}')">
- ${up?'<div class="formrow"><label>Your name</label><input name="name" required minlength="2" maxlength="80"></div><div class="formrow"><label>Private contact phone</label><input name="phone" type="tel" maxlength="32"></div>':''}
+ ${up?'<div class="formrow"><label>Your name</label><input name="name" required minlength="2" maxlength="80"></div><div class="formrow"><label>Business / online store name</label><input name="business_name" required minlength="2" maxlength="80" placeholder="e.g. Kandy Mobile Hub"></div><div class="formrow"><label>Private contact phone</label><input name="phone" type="tel" maxlength="32"></div>':''}
  <div class="formrow"><label>Email</label><input id="plEmail" name="email" type="email" required maxlength="254"></div>
  <div class="formrow"><label>Password</label><input name="password" type="password" required minlength="10" maxlength="128" autocomplete="${up?'new-password':'current-password'}"></div>
  ${up?'<p class="pl-muted">At least 10 characters. Email verification is required.</p>':'<button type="button" class="pl-link" onclick="plResetPassword()">Forgot password?</button>'}
@@ -22,10 +22,10 @@ function auth(mode='signup'){
 }
 window.plAuth=auth;
 window.openSell=async()=>{try{const u=await user();if(!u)return auth('signup');await profile(u);await dashboard();}catch(e){auth('login');msg(e.message,true);}};
-window.plAuthSubmit=async(e,mode)=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('[type=submit]'),v=new FormData(f),email=String(v.get('email')).trim().toLowerCase(),password=String(v.get('password'));b.disabled=true;b.textContent='Please wait…';try{let r;if(mode==='signup'){r=await db.auth.signUp({email,password,options:{data:{full_name:String(v.get('name')||''),phone:String(v.get('phone')||'')},emailRedirectTo:location.origin+location.pathname}});if(r.error)throw r.error;if(!r.data.session){openModal('Verify your email',`<div class="pl-panel"><h3>Check your inbox</h3><p>We sent a verification link to <b>${esc(email)}</b>. Verify your email, then return and log in.</p><p class="pl-muted">Add the PhoneLanka website URL to Supabase Auth's allowed redirect URLs if the link opens the wrong page.</p><button class="btn primary pl-wide" onclick="plAuth('login')">Go to login</button></div>`);return;}}else{r=await db.auth.signInWithPassword({email,password});if(r.error)throw r.error;}await profile(r.data.user);await dashboard();}catch(err){msg(err.message,true);}finally{b.disabled=false;b.textContent=mode==='signup'?'Create seller account':'Log in securely';}};
+window.plAuthSubmit=async(e,mode)=>{e.preventDefault();const f=e.currentTarget,b=f.querySelector('[type=submit]'),v=new FormData(f),email=String(v.get('email')).trim().toLowerCase(),password=String(v.get('password'));b.disabled=true;b.textContent='Please wait…';try{let r;if(mode==='signup'){r=await db.auth.signUp({email,password,options:{data:{full_name:String(v.get('name')||''),business_name:String(v.get('business_name')||'').trim(),phone:String(v.get('phone')||'')},emailRedirectTo:location.origin+location.pathname}});if(r.error)throw r.error;if(!r.data.session){openModal('Verify your email',`<div class="pl-panel"><h3>Check your inbox</h3><p>We sent a verification link to <b>${esc(email)}</b>. Verify your email, then return and log in.</p><p class="pl-muted">Add the PhoneLanka website URL to Supabase Auth's allowed redirect URLs if the link opens the wrong page.</p><button class="btn primary pl-wide" onclick="plAuth('login')">Go to login</button></div>`);return;}}else{r=await db.auth.signInWithPassword({email,password});if(r.error)throw r.error;}await profile(r.data.user);await dashboard();}catch(err){msg(err.message,true);}finally{b.disabled=false;b.textContent=mode==='signup'?'Create seller account':'Log in securely';}};
 window.plResetPassword=async()=>{const email=document.getElementById('plEmail')?.value?.trim();if(!email)return msg('Enter your email first.',true);const r=await db.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});msg(r.error?r.error.message:'If the account exists, a reset link has been sent.');};
 function shopForm(s){return `<form onsubmit="plSaveShop(event)"><div class="pl-form-grid">
-<div class="formrow"><label>Shop name</label><input name="shop_name" required minlength="2" maxlength="80" value="${esc(s?.shop_name||'')}"></div>
+<div class="formrow"><label>Shop name</label><input name="shop_name" required minlength="2" maxlength="80" value="${esc(s?.shop_name||businessName)}"></div>
 <div class="formrow"><label>Shop URL slug</label><input name="slug" required minlength="3" maxlength="48" pattern="[a-z0-9]+(-[a-z0-9]+)*" value="${esc(s?.slug||'')}" placeholder="kandy-mobile-hub"></div>
 <div class="formrow"><label>District</label><select id="plDistrict" name="district" required onchange="plProvince()"><option value="">Choose district</option>${(typeof districts!=='undefined'?districts:[]).map(d=>`<option ${d===s?.district?'selected':''}>${esc(d)}</option>`).join('')}</select></div>
 <div class="formrow"><label>Province</label><input id="plProvince" name="province" readonly required value="${esc(s?.province||'')}"></div>
