@@ -44,7 +44,7 @@ async function dashboard(){
  openModal('Seller dashboard',`<div class="pl-panel">
  <div class="pl-account-line"><b>${esc(s.shop_name)}</b><button class="pl-link" onclick="plSignOut()">Log out</button></div>
  <div class="pl-shop-state"><b>${s.status==='active'?'Active shop':s.status==='suspended'?'Suspended':'Pending review'}</b><small>${s.status==='active'?'Your shop can appear publicly.':'Your shop and listings stay hidden until approved.'}</small></div>
- <div class="pl-dash-stats"><div><b>${items.length}</b><small>Total</small></div><div><b>${items.filter(x=>x.status==='active').length}</b><small>Live</small></div><div><b>${items.filter(x=>x.status==='pending').length}</b><small>Pending</small></div></div>
+ <div class="pl-dash-stats"><div><b>${items.length}/10</b><small>Phone slots</small></div><div><b>${items.filter(x=>x.status==='active').length}</b><small>Live</small></div><div><b>${items.filter(x=>x.status==='pending').length}</b><small>Pending</small></div></div>
  <div class="pl-dash-section"><h3>Shop details</h3>${shopForm(s)}</div>
  <div class="pl-dash-section"><h3>Add a phone</h3><form onsubmit="plAddPhone(event)"><fieldset ${items.length>=10?'disabled':''} style="border:0;padding:0;margin:0;min-width:0"><div class="pl-form-grid">
  <div class="formrow"><label>Phone title</label><input name="title" required maxlength="100" placeholder="iPhone 14 Pro Max"></div><div class="formrow"><label>Brand</label><input name="brand" required maxlength="50" placeholder="Apple"></div>
