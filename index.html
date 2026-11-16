@@ -297,7 +297,7 @@ function showProduct(id){
  let p=products.find(x=>String(x.id)===String(id));if(!p)return;
  if(p.live){
   const sh=p.shop||{};
-  let wa=String(sh.whatsapp_phone||sh.contact_phone||'').replace(/\\D/g,'');
+  let wa=String(sh.whatsapp_phone||sh.contact_phone||'').replace(/\D/g,'');
   if(wa.startsWith('0'))wa='94'+wa.slice(1);
   const availability=p.availabilityStatus==='available'?'Available':p.availabilityStatus==='reserved'?'Reserved':p.availabilityStatus==='sold'?'Sold':'Not confirmed';
   const photos=(p.imageUrls||[p.imageUrl]).filter(Boolean).map((src,index)=>'<img src="'+plEscape(src)+'" alt="'+plEscape(p.name)+' photo '+(index+1)+'" style="width:100%;max-height:260px;object-fit:contain;border-radius:16px;background:#f1f5f9">').join('');
