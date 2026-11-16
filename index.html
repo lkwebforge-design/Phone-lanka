@@ -232,11 +232,11 @@ function render(){
 function renderShops(){
  const grid=document.getElementById('shopGrid');
  const liveShops=new Map();
- const normalizeShopName=value=>String(value||'').trim().toLocaleLowerCase().replace(/\\s+/g,' ');
+ const normalizeShopName=value=>String(value||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').trim().toLocaleLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\\s+/g,' ');
  products.filter(p=>p.live&&p.shop).forEach(p=>{
   const sh=p.shop,name=sh.shop_name||p.seller;
-  // Group duplicate shop records with the same displayed name and location into one storefront card.
-  const normalizedName=normalizeShopName(name);const key=normalizedName==='nkb group'?'nkb-group-single':[normalizedName,normalizeShopName(sh.town),normalizeShopName(sh.district)].join('|');
+  // NKB Group duplicate records represent one public shop card; keep all their phone listings together.
+  const normalizedName=normalizeShopName(name);const isNkbGroup=/^nkb groups?$/.test(normalizedName);const key=isNkbGroup?'nkb-group-single':[normalizedName,normalizeShopName(sh.town),normalizeShopName(sh.district)].join('|');
   if(!liveShops.has(key))liveShops.set(key,{shop:sh,name,items:[]});
   liveShops.get(key).items.push(p);
  });
