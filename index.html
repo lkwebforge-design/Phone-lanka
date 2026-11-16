@@ -257,9 +257,9 @@ function showShop(name){
  const items=products.filter(p=>p.seller===name);
  if(!items.length)return;
  const first=items[0],sh=first.shop||{},isLive=!!first.live;
- const wa=String(sh.whatsapp_phone||sh.contact_phone||'').replace(/\\D/g,'');
+ const wa=String(sh.whatsapp_phone||sh.contact_phone||'').replace(/\D/g,'');
  const locationText=[sh.town,sh.district,sh.province].filter(Boolean).join(' · ')||first.district||'Sri Lanka';
- const logo=sh.logoUrl?'<img class="storefront-logo" src="'+plEscape(sh.logoUrl)+'" alt="'+plEscape(name)+' logo" onerror="this.style.display=\'none\'">':'<div class="storefront-logo-fallback">'+plEscape(name.split(/\\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase())+'</div>';
+ const logo=sh.logoUrl?'<img class="storefront-logo" src="'+plEscape(sh.logoUrl)+'" alt="'+plEscape(name)+' logo" onerror="this.style.display=\'none\'">':'<div class="storefront-logo-fallback">'+plEscape(name.split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase())+'</div>';
  const phoneRows=items.map(x=>'<article class="storefront-phone"><div class="storefront-phone-image">'+(x.imageUrl?'<img src="'+plEscape(x.imageUrl)+'" alt="'+plEscape(x.name)+'" loading="lazy">':'<span>Phone photo</span>')+'</div><div class="storefront-phone-info"><h3>'+plEscape(x.name)+'</h3><p>'+plEscape([x.model,x.condition].filter(Boolean).join(' · '))+'</p><strong class="storefront-price">'+money(x.price)+'</strong>'+(x.live?'<span class="storefront-status '+(x.availabilityStatus==='available'?'is-available':x.availabilityStatus==='reserved'?'is-reserved':'is-unconfirmed')+'">'+plEscape(shopAvailabilityLabel(x))+'</span>':'<span class="storefront-status is-unconfirmed">Sample listing</span>')+'</div></article>').join('');
  const link=shopLinkFor(sh);
  const description=sh.description||(!isLive?'Sample seller storefront preview.':'');
