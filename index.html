@@ -256,9 +256,12 @@ function renderShops(){
   liveShops.get(key).items.push(p);
  });
  const liveShopNames=new Set([...liveShops.values()].map(x=>normalizeShopName(x.name)));
- const sampleNames=[...new Set(products.filter(p=>!p.live&&p.type==='Shop').map(p=>p.seller))].filter(name=>!liveShopNames.has(normalizeShopName(name)));
+ const sampleNames=[...new Set(products.filter(p=>!p.live&&p.type==='Shop').map(p=>p.seller))].filter(name=>!liveShopNames.has(normalizeShopName(name))&&matchesShop(name,{},products.filter(p=>!p.live&&p.seller===name)));
  const cards=[];
+ const shopQuery=normalizeShopName(document.getElementById('shopSearchInput')?.value||'');
+ const matchesShop=(name,sh,items)=>!shopQuery||normalizeShopName([name,sh?.town,sh?.district,sh?.province,sh?.description,...items.map(p=>p.name+' '+p.model)].filter(Boolean).join(' ')).includes(shopQuery);
  liveShops.forEach(({shop:sh,name,items})=>{
+  if(!matchesShop(name,sh,items))return;
   const logo=sh.logoUrl?'<img src="'+plEscape(sh.logoUrl)+'" alt="'+plEscape(name)+' logo" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'logo-missing\')">':'';
   const initials=name.split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
   cards.push('<article class="shop-card"><div class="shop-avatar'+(logo?' has-logo':'')+'">'+'<span>'+plEscape(initials)+'</span>'+logo+'</div><h3>'+plEscape(name)+'</h3><p>'+plEscape([sh.town,sh.district].filter(Boolean).join(' · ')||'Sri Lanka')+'</p><div class="shop-meta"><span>'+items.length+' listed phone'+(items.length===1?'':'s')+'</span><span>Seller shop</span></div><button class="btn soft" onclick="showShop(\''+plEscape(name).replace(/'/g,"&#39;")+'\')">Visit shop →</button></article>');
@@ -268,7 +271,7 @@ function renderShops(){
   const initials=name.split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
   cards.push('<article class="shop-card"><div class="shop-avatar">'+plEscape(initials)+'</div><h3>'+plEscape(name)+'</h3><p>Sample seller storefront · '+plEscape(district)+'</p><div class="shop-meta"><span>'+items.length+' sample phones</span><span>Preview shop</span></div><button class="btn soft" onclick="showShop(\''+plEscape(name).replace(/'/g,"&#39;")+'\')">Visit shop →</button></article>');
  });
- grid.innerHTML=cards.join('');
+ grid.innerHTML=cards.length?cards.join(''):'<div class="empty" style="grid-column:1/-1">No shops match that search. Try another shop name or location.</div>';
 }
 function shopAvailabilityLabel(p){return p.availabilityStatus==='available'?'Available':p.availabilityStatus==='reserved'?'Reserved':p.availabilityStatus==='sold'?'Sold':'Not confirmed'}
 function shopLinkFor(sh){const base=window.location.origin+window.location.pathname;return base+(sh.slug?'?shop='+encodeURIComponent(sh.slug):'')}
@@ -289,6 +292,7 @@ function plCardImage(event,id,direction){event.stopPropagation();const p=product
 function toggleSave(id){id=String(id);saved=saved.map(String);saved=saved.includes(id)?saved.filter(x=>x!==id):[...saved,id];localStorage.setItem('pl-saved',JSON.stringify(saved));render()}
 function applySearch(){search=document.getElementById('searchInput').value.trim().toLowerCase();render();document.getElementById('phones').scrollIntoView({behavior:'smooth'})}
 document.getElementById('searchInput').addEventListener('keydown',e=>{if(e.key==='Enter')applySearch()});
+document.getElementById('shopSearchInput').addEventListener('input',()=>{renderShops();document.getElementById('shopGrid').scrollLeft=0});
 document.querySelectorAll('[data-condition]').forEach(b=>b.onclick=()=>{condition=b.dataset.condition;document.querySelectorAll('[data-condition]').forEach(x=>x.classList.toggle('active',x===b));render()});
 document.querySelectorAll('[data-brand]').forEach(b=>b.onclick=()=>{brand=b.dataset.brand;condition='All';document.querySelectorAll('[data-condition]').forEach(x=>x.classList.toggle('active',x.dataset.condition==='All'));document.getElementById('phones').scrollIntoView({behavior:'smooth'});render()});
 document.getElementById('sortFilter').onchange=render;
