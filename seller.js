@@ -48,7 +48,7 @@ window.plFilterDistricts=()=>{const p=document.getElementById('plProvince')?.val
 window.plProvince=()=>{const d=document.getElementById('plDistrict')?.value,p=(typeof provinceByDistrict!=='undefined'?provinceByDistrict:{})[d]||'';const n=document.getElementById('plProvince');if(n)n.value=p;};
 async function dashboard(){
  const u=await user();if(!u)return auth('login');
- const {data:s,error}=await db.from('seller_shops').select('*').eq('owner_id',u.id).maybeSingle();if(error)throw error;shop=s||null;
+ const {data,error}=await db.from('seller_shops').select('*').eq('owner_id',u.id).maybeSingle();if(error)throw error;let s=data;shop=s||null;
  if(s&&s.logo_path){try{const updatedShop=await normalizeExistingShopLogo(s);if(updatedShop){s=updatedShop;shop=updatedShop;}}catch(logoError){console.warn('PhoneLanka existing logo formatting skipped:',logoError);}}
  if(!s){openModal('Set up your PhoneLanka shop',`<div class="pl-panel"><p class="pl-muted">Your shop starts as <b>Pending review</b>. You can prepare listings while it is reviewed.</p>${shopForm(null)}<button class="pl-link" onclick="plSignOut()">Log out</button></div>`);return;}
  const r=await db.from('phone_listings').select('*').eq('shop_id',s.id).order('created_at',{ascending:false});if(r.error)throw r.error;items=r.data||[];
