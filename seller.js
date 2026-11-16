@@ -79,7 +79,7 @@ async function normalizeShopLogo(file){
   else bitmap=await new Promise((resolve,reject)=>{const img=new Image(),url=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not read this logo image. Try another file.'))};img.src=url;});
   const width=bitmap.width||bitmap.naturalWidth,height=bitmap.height||bitmap.naturalHeight;
   if(!width||!height)throw Error('This logo image appears to be empty.');
-  const size=512,padding=54,available=size-padding*2,scale=Math.min(available/width,available/height);
+  const size=512,padding=18,available=size-padding*2,scale=Math.min(available/width,available/height);
   const drawWidth=Math.round(width*scale),drawHeight=Math.round(height*scale);
   const canvas=document.createElement('canvas');canvas.width=size;canvas.height=size;
   const ctx=canvas.getContext('2d');if(!ctx)throw Error('Your browser cannot prepare this logo. Please try another browser.');
