@@ -36,6 +36,8 @@
 .pl-dash-section{padding-top:14px;border-top:1px solid var(--line)}
 .pl-dash-section h3{font-size:16px;margin:0 0 12px}
 .pl-listing-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:9px;padding:12px 0;border-top:1px solid var(--line)}
+.pl-listing-row{grid-template-columns:minmax(0,1fr) auto auto auto}
+@media(max-width:560px){.pl-listing-row{grid-template-columns:minmax(0,1fr) auto}.pl-listing-row>label,.pl-listing-row>button{grid-column:2}}
 .pl-listing-row>div{min-width:0}
 .pl-listing-row b,.pl-listing-row small{display:block;overflow-wrap:anywhere}
 .pl-listing-row small{font-size:11px;color:var(--muted)}
