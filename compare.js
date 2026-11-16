@@ -22,7 +22,8 @@
     document.querySelectorAll('.pl-compare-btn').forEach(button => {
       const active = selected.has(button.dataset.phoneId);
       button.classList.toggle('selected', active);
-      button.textContent = active ? '✓ Added to compare' : '＋ Compare phone';
+      const label = active ? '✓ Added to compare' : '＋ Compare phone';
+      if (button.textContent !== label) button.textContent = label;
     });
   }
 
@@ -80,6 +81,9 @@
   tray.querySelector('.pl-compare-clear').addEventListener('click', () => { selected.clear(); updateTray(); });
   tray.querySelector('.pl-compare-open').addEventListener('click', openComparison);
   const observer = new MutationObserver(attachButtons);
-  observer.observe(document.body, {childList:true,subtree:true});
+  ['productRow1','productRow2','productRow3'].forEach(id => {
+    const row = document.getElementById(id);
+    if (row) observer.observe(row, {childList:true,subtree:true});
+  });
   attachButtons();
 })();
