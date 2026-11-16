@@ -86,7 +86,7 @@ async function normalizeShopLogo(file){
   ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   ctx.drawImage(bitmap,Math.round((size-drawWidth)/2),Math.round((size-drawHeight)/2),drawWidth,drawHeight);
   const blob=await new Promise((resolve,reject)=>canvas.toBlob(result=>result?resolve(result):reject(new Error('Could not prepare your logo. Please try again.')),'image/png'));
-  const safeName=(file.name||'shop-logo').replace(/\\.[^.]+$/,'').replace(/[^a-z0-9_-]/gi,'-').slice(0,45)||'shop-logo';
+  const safeName=(file.name||'shop-logo').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]/gi,'-').slice(0,45)||'shop-logo';
   return new File([blob],safeName+'-square.png',{type:'image/png',lastModified:Date.now()});
  }finally{if(bitmap&&typeof bitmap.close==='function')bitmap.close();}
 }
