@@ -49,6 +49,7 @@ window.plProvince=()=>{const d=document.getElementById('plDistrict')?.value,p=(t
 async function dashboard(){
  const u=await user();if(!u)return auth('login');
  const {data:s,error}=await db.from('seller_shops').select('*').eq('owner_id',u.id).maybeSingle();if(error)throw error;shop=s||null;
+ if(s&&s.logo_path){try{const updatedShop=await normalizeExistingShopLogo(s);if(updatedShop){s=updatedShop;shop=updatedShop;}}catch(logoError){console.warn('PhoneLanka existing logo formatting skipped:',logoError);}}
  if(!s){openModal('Set up your PhoneLanka shop',`<div class="pl-panel"><p class="pl-muted">Your shop starts as <b>Pending review</b>. You can prepare listings while it is reviewed.</p>${shopForm(null)}<button class="pl-link" onclick="plSignOut()">Log out</button></div>`);return;}
  const r=await db.from('phone_listings').select('*').eq('shop_id',s.id).order('created_at',{ascending:false});if(r.error)throw r.error;items=r.data||[];
  openModal('Seller dashboard',`<div class="pl-panel">
@@ -89,6 +90,22 @@ async function normalizeShopLogo(file){
   const safeName=(file.name||'shop-logo').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]/gi,'-').slice(0,45)||'shop-logo';
   return new File([blob],safeName+'-square.png',{type:'image/png',lastModified:Date.now()});
  }finally{if(bitmap&&typeof bitmap.close==='function')bitmap.close();}
+}
+async function normalizeExistingShopLogo(currentShop){
+ const publicUrl=db.storage.from('shop-assets').getPublicUrl(currentShop.logo_path).data?.publicUrl;
+ if(!publicUrl)return null;
+ const response=await fetch(publicUrl,{cache:'no-store'});
+ if(!response.ok)throw Error('Could not load the existing shop logo.');
+ const blob=await response.blob();
+ if(!blob.size)return null;
+ const sourceName=String(currentShop.logo_path).split('/').pop()||'existing-shop-logo';
+ const sourceFile=new File([blob],sourceName,{type:blob.type||'image/png'});
+ const prepared=await normalizeShopLogo(sourceFile);
+ const newPath=await upload(prepared,currentShop.owner_id,'logo');
+ const result=await db.from('seller_shops').update({logo_path:newPath}).eq('id',currentShop.id).select('*').single();
+ if(result.error){await db.storage.from('shop-assets').remove([newPath]);throw result.error;}
+ await db.storage.from('shop-assets').remove([currentShop.logo_path]);
+ return result.data;
 }
 async function upload(file,uid,prefix){if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Only JPG, PNG and WebP images are allowed.');if(file.size>5*1024*1024)throw Error('Each image must be 5 MB or smaller.');const path=uid+'/'+prefix+'-'+crypto.randomUUID()+'-'+file.name.toLowerCase().replace(/[^a-z0-9._-]/g,'-').slice(-60);const r=await db.storage.from('shop-assets').upload(path,file,{contentType:file.type,upsert:false});if(r.error)throw r.error;return path;}
 window.plAddPhone=async e=>{e.preventDefault();const f=e.currentTarget,v=new FormData(f),u=await user(),files=Array.from(v.getAll('photos')).filter(x=>x&&x.size);if(!u||!shop)return auth('login');if(files.length>2)return msg('The $1 plan allows up to 2 photos per phone.',true);if(items.length>=10)return msg('The $1 plan allows up to 10 phone listings. Remove a listing before adding another.',true);const b=f.querySelector('[type=submit]'),paths=[];b.disabled=true;const originalLabel=b.textContent;b.textContent='Uploading & submitting…';try{for(const file of files)paths.push(await upload(file,u.id,'phone'));const data={shop_id:shop.id,seller_id:u.id,title:String(v.get('title')).trim(),brand:String(v.get('brand')).trim(),model:String(v.get('model')||'').trim(),price_lkr:Number(v.get('price')),condition:String(v.get('condition')),storage_gb:v.get('storage')?Number(v.get('storage')):null,ram_gb:v.get('ram')?Number(v.get('ram')):null,color:String(v.get('color')||'').trim()||null,description:String(v.get('description')||'').trim(),warranty:String(v.get('warranty')||'').trim()||null,is_negotiable:v.get('negotiable')==='on',image_paths:paths};const r=await db.from('phone_listings').insert(data);if(r.error)throw r.error;await dashboard();notify('Phone submitted successfully! It is now pending review.');}catch(err){if(paths.length)await db.storage.from('shop-assets').remove(paths);msg(err.message,true);notify(err.message,'error');}finally{b.disabled=false;b.textContent=originalLabel;}};
