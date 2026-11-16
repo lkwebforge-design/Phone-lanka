@@ -378,7 +378,7 @@ render();renderShops();loadOfficialLocationData();loadLiveListings().then(()=>{c
 <script src="compare.js?v=3"></script>
 <script src="seller.js?v=nkb-shop-restored-1"></script>
 <!-- PHONELANKA AI ASSISTANT — isolated floating chat widget -->
-<style id="webforge-ai-assistant-styles">
+<style id="phonelanka-ai-assistant-styles">
 /* PhoneLanka AI — refreshed floating assistant */
 #pl-ai-launcher{position:fixed;right:24px;bottom:24px;z-index:9998;display:flex;align-items:center;gap:12px;padding:9px 17px 9px 9px;border:1px solid rgba(103,200,255,.42);border-radius:999px;background:linear-gradient(135deg,#18251a 0%,#071426 75%);color:#f6f9f3;box-shadow:0 14px 42px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.08),0 0 30px rgba(103,200,255,.10);font:700 12px/1.2 'DM Sans',sans-serif;letter-spacing:.01em;cursor:pointer;transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}
 #pl-ai-launcher:hover{transform:translateY(-3px);border-color:#67c8ff;box-shadow:0 18px 48px rgba(0,0,0,.44),0 0 36px rgba(103,200,255,.18)}
@@ -451,7 +451,7 @@ render();renderShops();loadOfficialLocationData();loadLiveListings().then(()=>{c
     <div class="pl-ai-quick" id="pl-ai-quick">
       <button type="button" data-prompt="Help me find a phone on PhoneLanka.">Find a phone</button>
       <button type="button" data-prompt="How do I create a shop and list a phone as a seller?">Sell on PhoneLanka</button>
-      <button type="button" data-prompt="Can you explain your Using PhoneLanka?">Using PhoneLanka</button>
+      <button type="button" data-prompt="How do I use PhoneLanka safely?">Using PhoneLanka</button>
     </div>
   </div>
   <form class="pl-ai-compose" id="pl-ai-form">
@@ -459,7 +459,7 @@ render();renderShops();loadOfficialLocationData();loadLiveListings().then(()=>{c
     <p class="pl-ai-disclaimer">AI-generated guidance · Confirm listing and seller details in your PhoneLanka account.</p>
   </form>
 </section>
-<script id="webforge-ai-assistant">
+<script id="phonelanka-ai-assistant">
 (function(){
   const API='https://webforge-ai-chat-v2.lkwebforge.workers.dev/chat';
   const launcher=document.getElementById('pl-ai-launcher');
@@ -511,7 +511,7 @@ render();renderShops();loadOfficialLocationData();loadLiveListings().then(()=>{c
     if(controller)controller.abort();history=[];messagesEl.innerHTML='';
     const first=addMessage('assistant',welcome);first.querySelector('.pl-ai-stamp').textContent='PHONELANKA AI';
     const quick=document.createElement('div');quick.className='pl-ai-quick';quick.id='pl-ai-quick';
-    [['Packages & prices','Help me find a phone on PhoneLanka.'],['Sell on PhoneLanka','How do I create a shop and list a phone as a seller?'],['Using PhoneLanka','Can you explain your Using PhoneLanka?']].forEach(([label,prompt])=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.prompt=prompt;quick.appendChild(b);});
+    [['Find a phone','Help me find a phone on PhoneLanka.'],['Sell on PhoneLanka','How do I create a shop and list a phone as a seller?'],['Using PhoneLanka','How do I use PhoneLanka safely?']].forEach(([label,prompt])=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.dataset.prompt=prompt;quick.appendChild(b);});
     messagesEl.appendChild(quick);setBusy(false);input.focus();
   });
   form.addEventListener('submit',e=>{e.preventDefault();submit();});
