@@ -330,5 +330,5 @@ document.getElementById('modalBack').addEventListener('click',e=>{if(e.target.id
 render();renderShops();loadOfficialLocationData();loadLiveListings().then(()=>{const requestedShop=new URLSearchParams(window.location.search).get('shop');if(!requestedShop)return;const match=products.find(p=>p.live&&p.shop&&p.shop.slug===requestedShop);if(match)showShop(match.seller)});
 </script>
 <script src="compare.js?v=3"></script>
-<script src="seller.js?v=seller-delete-1"></script>
+<script src="seller.js?v=logo-square-2"></script>
 </body></html>
