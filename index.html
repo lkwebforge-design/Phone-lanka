@@ -236,7 +236,7 @@ function renderShops(){
  products.filter(p=>p.live&&p.shop).forEach(p=>{
   const sh=p.shop,name=sh.shop_name||p.seller;
   // Group duplicate shop records with the same displayed name and location into one storefront card.
-  const key=[normalizeShopName(name),normalizeShopName(sh.town),normalizeShopName(sh.district)].join('|');
+  const normalizedName=normalizeShopName(name);const key=normalizedName==='nkb group'?'nkb-group-single':[normalizedName,normalizeShopName(sh.town),normalizeShopName(sh.district)].join('|');
   if(!liveShops.has(key))liveShops.set(key,{shop:sh,name,items:[]});
   liveShops.get(key).items.push(p);
  });
@@ -330,5 +330,5 @@ document.getElementById('modalBack').addEventListener('click',e=>{if(e.target.id
 render();renderShops();loadOfficialLocationData();loadLiveListings().then(()=>{const requestedShop=new URLSearchParams(window.location.search).get('shop');if(!requestedShop)return;const match=products.find(p=>p.live&&p.shop&&p.shop.slug===requestedShop);if(match)showShop(match.seller)});
 </script>
 <script src="compare.js?v=3"></script>
-<script src="seller.js?v=logo-square-2"></script>
+<script src="seller.js?v=existing-logo-migration-3"></script>
 </body></html>
