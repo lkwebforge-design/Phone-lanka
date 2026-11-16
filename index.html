@@ -178,8 +178,6 @@ function showProduct(id){let p=products.find(x=>String(x.id)===String(id));if(!p
 function openSell(){openModal('List your phone','<p>Seller registration and listing submission will be enabled when the marketplace backend is connected.</p><div class="formrow"><label>Your name / shop name</label><input placeholder="Enter seller name"></div><div class="formrow"><label>Phone number</label><input placeholder="+94 7X XXX XXXX"></div><div class="formrow"><label>District</label><select>'+districts.map(d=>'<option>'+d+'</option>').join('')+'</select></div><div class="notice">This preview does not submit or store seller applications. We will connect secure accounts, listings and moderation before accepting real sellers.</div><button class="btn primary" style="width:100%;margin-top:15px" onclick="closeModal()">Close preview</button>')}
 document.getElementById('savedBtn').onclick=()=>{saved=saved.map(String);const items=saved.map(id=>products.find(p=>String(p.id)===id)).filter(Boolean);openModal('Saved phones',items.length?'<div class="pl-saved-list">'+items.map(p=>'<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)">'+(p.imageUrl?'<img src="'+plEscape(p.imageUrl)+'" alt="" style="width:58px;height:64px;object-fit:cover;border-radius:10px">':'')+'<div style="flex:1;min-width:0"><b>'+plEscape(p.name)+'</b><div class="meta">'+money(p.price)+'</div></div><button class="textlink" onclick="showProduct(\''+plEscape(p.id)+'\')">View</button><button class="textlink" onclick="toggleSave(\''+plEscape(p.id)+'\');document.getElementById(\'savedBtn\').click()">Remove</button></div>').join('')+'</div>':saved.length?'<p>Your saved phones are being loaded. Please try again in a moment.</p>':'<p>You have not saved any phones yet. Tap ♡ on a listing to keep it here.</p>')};
 document.getElementById('modalBack').addEventListener('click',e=>{if(e.target.id==='modalBack')closeModal()});
-<script src="compare.js?v=1"></script>
-
 // Reliable horizontal browsing: native touch scrolling, touch fallback, mouse drag and wheel support.
 (function enablePhoneRowScrolling(){
   document.querySelectorAll('.phone-row').forEach(row=>{
@@ -226,5 +224,6 @@ document.getElementById('modalBack').addEventListener('click',e=>{if(e.target.id
 
 render();renderShops();loadOfficialLocationData();loadLiveListings();
 </script>
+<script src="compare.js?v=2"></script>
 <script src="seller.js?v=seller-delete-1"></script>
 </body></html>
