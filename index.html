@@ -256,10 +256,10 @@ function renderShops(){
   liveShops.get(key).items.push(p);
  });
  const liveShopNames=new Set([...liveShops.values()].map(x=>normalizeShopName(x.name)));
- const sampleNames=[...new Set(products.filter(p=>!p.live&&p.type==='Shop').map(p=>p.seller))].filter(name=>!liveShopNames.has(normalizeShopName(name))&&matchesShop(name,{},products.filter(p=>!p.live&&p.seller===name)));
- const cards=[];
  const shopQuery=normalizeShopName(document.getElementById('shopSearchInput')?.value||'');
  const matchesShop=(name,sh,items)=>!shopQuery||normalizeShopName([name,sh?.town,sh?.district,sh?.province,sh?.description,...items.map(p=>p.name+' '+p.model)].filter(Boolean).join(' ')).includes(shopQuery);
+ const sampleNames=[...new Set(products.filter(p=>!p.live&&p.type==='Shop').map(p=>p.seller))].filter(name=>!liveShopNames.has(normalizeShopName(name))&&matchesShop(name,{},products.filter(p=>!p.live&&p.seller===name)));
+ const cards=[];
  liveShops.forEach(({shop:sh,name,items})=>{
   if(!matchesShop(name,sh,items))return;
   const logo=sh.logoUrl?'<img src="'+plEscape(sh.logoUrl)+'" alt="'+plEscape(name)+' logo" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'logo-missing\')">':'';
