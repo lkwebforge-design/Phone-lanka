@@ -24,6 +24,4 @@ async function mountSellerTools(){const u=await db.auth.getUser();if(u.error||!u
 }
 const original=window.openSell;
 if(typeof original==='function')window.openSell=async function(...args){await original.apply(this,args);try{await mountSellerTools();}catch(e){console.warn('Seller tools unavailable',e);}};
-const originalAuthSubmit=window.plAuthSubmit;
-if(typeof originalAuthSubmit==='function')window.plAuthSubmit=async function(...args){await originalAuthSubmit.apply(this,args);try{await mountSellerTools();}catch(e){console.warn('Seller tools unavailable',e);}};
 })();
