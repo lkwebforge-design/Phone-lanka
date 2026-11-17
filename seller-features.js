@@ -22,6 +22,6 @@ async function mountSellerTools(){const u=await db.auth.getUser();if(u.error||!u
  const verify=$('plRequestVerification');if(verify)verify.onclick=async()=>{verify.disabled=true;try{const r=await db.rpc('request_shop_verification');if(r.error)throw r.error;verify.remove();const p=section.querySelector('h3:nth-of-type(2)')?.nextElementSibling;if(p)p.innerHTML='Current status: <b>pending</b>. Your request has been sent to the PhoneLanka admin team.';}catch(e){alert(e.message);verify.disabled=false;}};
  section.querySelectorAll('[data-pl-review]').forEach(form=>form.onsubmit=async e=>{e.preventDefault();const b=form.querySelector('button');b.disabled=true;try{const response=new FormData(form).get('response');const r=await db.rpc('respond_to_shop_review',{p_review_id:form.dataset.plReview,p_response:String(response).trim()});if(r.error)throw r.error;form.outerHTML='<p class="notice">Your response was posted.</p>';}catch(err){alert(err.message);b.disabled=false;}});
 }
-const original=window.plSellerDashboard;
-if(typeof original==='function')window.plSellerDashboard=async function(...args){await original.apply(this,args);try{await mountSellerTools();}catch(e){console.warn('Seller tools unavailable',e);}};
+const original=window.openSell;
+if(typeof original==='function')window.openSell=async function(...args){await original.apply(this,args);try{await mountSellerTools();}catch(e){console.warn('Seller tools unavailable',e);}};
 })();
