@@ -56,7 +56,19 @@ async function showSavedDashboard(){
  wireRemove();
 }
 const savedButton=$('savedBtn');if(savedButton)savedButton.onclick=()=>showSavedDashboard().catch(e=>alert(e.message));
-const originalShop=window.showShop;if(typeof originalShop==='function')window.showShop=function(name){originalShop(name);db.from('seller_shops').select('id').eq('shop_name',name).eq('status','active').maybeSingle().then(r=>{if(!r.error&&r.data){activeShopId=r.data.id;activeListingId=null;recordAnalytics(activeShopId,null,'shop_view');}});};
+const originalShop=window.showShop;
+if(typeof originalShop==='function')window.showShop=function(name){
+ originalShop(name);
+ db.from('seller_shops').select('id').eq('shop_name',name).eq('status','active').maybeSingle().then(async r=>{
+  if(r.error||!r.data)return;activeShopId=r.data.id;activeListingId=null;recordAnalytics(activeShopId,null,'shop_view');
+  const host=$('modalContent');if(!host||host.querySelector('.pl-shop-reviews'))return;
+  const reviews=await db.from('shop_reviews').select('id,rating,review_text,seller_response,created_at').eq('shop_id',activeShopId).eq('status','published').order('created_at',{ascending:false}).limit(10);
+  const section=document.createElement('section');section.className='pl-shop-reviews';section.style.cssText='border-top:1px solid #dce4ef;margin-top:18px;padding-top:16px';
+  section.innerHTML='<h3>Buyer reviews</h3>'+(reviews.error?'':(reviews.data||[]).map(x=>'<article style="padding:10px 0;border-bottom:1px solid #e5ebf3"><b>'+esc(x.rating)+'/5</b><p>'+esc(x.review_text||'')+'</p>'+(x.seller_response?'<p class="notice"><b>Seller response:</b> '+esc(x.seller_response)+'</p>':'')+'</article>').join('')||'<p class="pl-muted">No published reviews yet.</p>')+'<h4>Leave a review</h4><form id="plShopReviewForm"><div class="formrow"><label>Rating</label><select name="rating" required><option value="5">5 — Excellent</option><option value="4">4 — Good</option><option value="3">3 — Average</option><option value="2">2 — Poor</option><option value="1">1 — Very poor</option></select></div><div class="formrow"><label>Your experience</label><textarea name="review_text" rows="3" maxlength="1200" placeholder="Share a helpful, honest review"></textarea></div><button class="btn primary">Submit review</button><p class="pl-muted" id="plReviewStatus">Reviews are checked by PhoneLanka before publication.</p></form>';
+  host.appendChild(section);
+  const form=$('plShopReviewForm');form.onsubmit=async e=>{e.preventDefault();if(!await requireUser(()=>form.requestSubmit()))return;const v=new FormData(form);const ins=await db.from('shop_reviews').insert({shop_id:activeShopId,reviewer_id:currentUser.id,rating:Number(v.get('rating')),review_text:String(v.get('review_text')||'').trim(),status:'pending'});if(ins.error){$('plReviewStatus').textContent=ins.error.message;return;}$('plReviewStatus').textContent='Review submitted. It will appear after moderation.';form.querySelector('button').disabled=true;};
+ });
+};
 document.addEventListener('click',e=>{const a=e.target.closest('a[href*="wa.me/"]');if(a&&activeShopId)recordAnalytics(activeShopId,activeListingId,'whatsapp_click');});
 
 db.auth.onAuthStateChange((_event,session)=>{currentUser=session?.user||null;if(currentUser)loadSaved();});
