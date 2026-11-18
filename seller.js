@@ -91,7 +91,10 @@ async function dashboard(){
  if(!s.billing_grandfathered){
   const sub=await db.from('seller_subscriptions').select('*').eq('shop_id',s.id).maybeSingle();if(sub.error)throw sub.error;subscription=sub.data;
   if(!subscription||!subscription.plan_selected){planPicker(true);return;}
-  if(subscription.status!=='active'||!subscription.starts_at||new Date(subscription.starts_at)>new Date()||(subscription.ends_at&&new Date(subscription.ends_at)<=new Date())){
+  const previewLookup=await db.from('public_shop_directory').select('id').eq('id',s.id).maybeSingle();
+  if(previewLookup.error)throw previewLookup.error;
+  const queenBeeStarterPreview=!!previewLookup.data&&subscription.plan_code==='starter'&&subscription.status==='pending'&&subscription.plan_selected===true;
+  if(!queenBeeStarterPreview&&(subscription.status!=='active'||!subscription.starts_at||new Date(subscription.starts_at)>new Date()||(subscription.ends_at&&new Date(subscription.ends_at)<=new Date()))){
    const plan=PLAN_LIMITS[subscription.plan_code]||PLAN_LIMITS.starter;
    openModal('Payment required to activate your shop',`<div class="pl-panel">
     <div class="pl-shop-state"><b>Payment pending · ${esc(plan.label)}</b><small>Your shop is not publicly visible and you cannot publish phone listings yet.</small></div>
@@ -107,6 +110,7 @@ async function dashboard(){
  const r=await db.from('phone_listings').select('*').eq('shop_id',s.id).order('created_at',{ascending:false});if(r.error)throw r.error;items=r.data||[];
  openModal('Seller dashboard',`<div class="pl-panel">
  <div class="pl-account-line"><b>${esc(s.shop_name)}</b><button class="pl-link" onclick="plSignOut()">Log out</button></div>
+ ${queenBeeStarterPreview?'<div class="pl-shop-state"><b>Queen bee preview · Payment pending</b><small>Special preview access: you can add up to 10 phones with 2 photos each without payment. Listings remain subject to PhoneLanka review.</small></div>':''}
  <div class="pl-shop-state"><b>${s.status==='active'?'Active shop':s.status==='suspended'?'Suspended':'Pending review'}</b><small>${s.status==='active'?'Your shop can appear publicly.':'Your shop and listings stay hidden until approved.'}</small></div>
  <div class="pl-dash-stats"><div><b>${items.length}/${limits.phones}</b><small>Phone slots</small></div><div><b>${items.filter(x=>x.status==='active').length}</b><small>Live</small></div><div><b>${items.filter(x=>x.status==='pending').length}</b><small>Pending</small></div></div>
  <div class="pl-dash-section"><h3>Shop details</h3>${shopForm(s)}</div>
