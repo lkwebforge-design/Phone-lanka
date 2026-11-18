@@ -51,26 +51,27 @@ function shopForm(s){return `<form onsubmit="plSaveShop(event)"><div class="pl-f
 window.plFilterDistricts=()=>{const p=document.getElementById('plProvince')?.value,select=document.getElementById('plDistrict');if(!select)return;select.disabled=!p;const current=select.value;const list=(typeof districts!=='undefined'?districts:[]).filter(d=>(typeof provinceByDistrict!=='undefined'?provinceByDistrict:{})[d]===p);select.innerHTML='<option value="">Choose district</option>'+list.map(d=>`<option value="${esc(d)}">${esc(d)}</option>`).join('');if(list.includes(current))select.value=current;};
 window.plProvince=()=>{const d=document.getElementById('plDistrict')?.value,p=(typeof provinceByDistrict!=='undefined'?provinceByDistrict:{})[d]||'';const n=document.getElementById('plProvince');if(n)n.value=p;};
 function planPicker(existingShop=false){
- openModal('Choose your PhoneLanka plan',`<div class="pl-panel">
- <p class="pl-muted">Choose a plan before setting up your shop. Your shop stays private until your payment is verified.</p>
+ openModal(existingShop?'Choose your renewal plan':'Choose your PhoneLanka launch plan',`<div class="pl-panel">
+ <p class="pl-muted">${existingShop?'Your one-time launch offer is only available while creating a new shop. Choose Premium to continue.':'Choose your one-time launch offer or Premium before setting up your shop. Your shop stays private until payment is verified.'}</p>
  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin:18px 0">
-  <article style="border:1px solid #b9cbe0;border-radius:16px;padding:17px;background:linear-gradient(145deg,#f8fbff,#edf5ff)">
-   <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:#174b83">STARTER · FIRST MONTH</div><div style="font-size:32px;font-weight:950;margin:7px 0">$1</div><div style="font-size:12px;color:#637792">30 days</div>
+  ${existingShop?'':`<article style="border:1px solid #b9cbe0;border-radius:16px;padding:17px;background:linear-gradient(145deg,#f8fbff,#edf5ff)">
+   <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:#174b83">ONE-TIME NEW SHOP OFFER</div><div style="font-size:32px;font-weight:950;margin:7px 0">$1</div><div style="font-size:12px;color:#637792">First 30 days · available once during shop creation</div>
    <ul style="padding-left:18px;color:#405b7b;font-size:13px;line-height:1.9"><li>Up to 10 phone listings</li><li>2 photos per phone</li><li>Standard shop placement</li></ul>
-   <button class="btn primary pl-wide" onclick="plSelectPlan('starter',${existingShop})">Choose Starter</button>
-  </article>
+   <button class="btn primary pl-wide" onclick="plSelectPlan('starter',false)">Choose one-time offer</button>
+  </article>`}
   <article style="border:2px solid #174b83;border-radius:16px;padding:16px;background:linear-gradient(145deg,#f3f9ff,#e2f0ff)">
-   <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:#174b83">PREMIUM · MONTHLY</div><div style="font-size:32px;font-weight:950;margin:7px 0">$13.50</div><div style="font-size:12px;color:#637792">Per month</div>
+   <div style="font-size:11px;font-weight:900;letter-spacing:1px;color:#174b83">PREMIUM · 30 DAYS</div><div style="font-size:32px;font-weight:950;margin:7px 0">$13.50</div><div style="font-size:12px;color:#637792">Every 30 days</div>
    <ul style="padding-left:18px;color:#405b7b;font-size:13px;line-height:1.9"><li>Up to 25 phone listings</li><li>4 photos per phone</li><li>Top shop placement</li></ul>
    <button class="btn primary pl-wide" onclick="plSelectPlan('premium',${existingShop})">Choose Premium</button>
   </article>
  </div>
- <p class="pl-legal">Visa/card checkout will appear once PhoneLanka's payment gateway is connected. Choosing a plan does not charge you or activate your shop.</p>
+ <p class="pl-legal">The $1 offer can be claimed once per seller, only during initial shop creation. After it expires, Premium is the only plan available to continue selling. Choosing a plan does not charge you or activate your shop; payment checkout is not connected yet.</p>
  <button class="pl-link" onclick="plSignOut()">Log out</button>
  </div>`);
 }
 window.plSelectPlan=async(code,existingShop=false)=>{
  if(!PLAN_LIMITS[code])return;
+ if(existingShop&&code==='starter'){msg('The $1 Starter offer is only available once during initial shop creation. Choose Premium to renew.',true);return;}
  selectedPlanCode=code;
  if(existingShop&&shop){
   try{
@@ -96,8 +97,7 @@ async function dashboard(){
     <div class="pl-shop-state"><b>Payment pending · ${esc(plan.label)}</b><small>Your shop is not publicly visible and you cannot publish phone listings yet.</small></div>
     <div style="border:1px solid #dce4ef;border-radius:15px;padding:17px;margin:16px 0"><small style="color:#718198">SELECTED PLAN</small><h2 style="margin:4px 0">${esc(plan.label)} · ${esc(plan.price)}</h2><p class="pl-muted">${plan.phones} phone listings · ${plan.photos} photos per phone</p></div>
     <p class="pl-muted">Card checkout is not connected yet. No payment has been taken. Your shop will remain hidden until a payment provider confirms the payment and PhoneLanka activates your subscription.</p>
-    <button class="btn soft pl-wide" onclick="plSelectPlan('starter',true)">Change plan to Starter</button>
-    <button class="btn soft pl-wide" style="margin-top:8px" onclick="plSelectPlan('premium',true)">Change plan to Premium</button>
+    <button class="btn primary pl-wide" onclick="plSelectPlan('premium',true)">Continue with Premium · $13.50 / 30 days</button>
     <button class="pl-link" onclick="plSignOut()">Log out</button>
    </div>`);
    return;
