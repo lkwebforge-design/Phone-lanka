@@ -250,7 +250,7 @@ function render(){
 
 function renderShops(){
  const grid=document.getElementById('shopGrid'),liveShops=new Map();
- const norm=v=>String(v||'').normalize('NFKD').replace(/[\\u0300-\\u036f]/g,'').trim().toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\\s+/g,' ');
+ const norm=v=>String(v||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').trim().toLowerCase().replace(/[^a-z0-9]+/g,' ').trim().replace(/\s+/g,' ');
  const add=(sh,name,items,closed)=>{
   const n=norm(name),key=/^nkb groups?$/.test(n)?'nkb-group-single':[n,norm(sh.town),norm(sh.district)].join('|');
   if(!liveShops.has(key))liveShops.set(key,{shop:sh,name,items:[],isClosed:!!closed});
@@ -264,16 +264,18 @@ function renderShops(){
  const cards=[];
  liveShops.forEach(({shop:sh,name,items,isClosed})=>{
   if(!matches(name,sh,items))return;
-  const logo=sh.logoUrl?'<img src="'+plEscape(sh.logoUrl)+'" alt="'+plEscape(name)+' logo" loading="lazy" onerror="this.style.display=\\'none\\';this.parentElement.classList.add(\\'logo-missing\\')">':'';
-  const initials=name.split(/\\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
+  const logo=sh.logoUrl?'<img src="'+plEscape(sh.logoUrl)+'" alt="'+plEscape(name)+' logo" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.classList.add(\'logo-missing\')">':'';
+  const initials=name.split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
   const banner=isClosed?'<div class="shop-closed-banner">SHOP CLOSED</div>':'';
   const meta=isClosed?'<span>Temporarily closed</span><span>Renewal required</span>':'<span>'+items.length+' listed phone'+(items.length===1?'':'s')+'</span><span>Seller shop</span>';
   const action=isClosed?'View shop status →':'Visit shop →';
-  cards.push('<article class="shop-card">'+banner+'<div class="shop-avatar'+(logo?' has-logo':'')+'"><span>'+plEscape(initials)+'</span>'+logo+'</div><h3>'+plEscape(name)+'</h3><p>'+plEscape([sh.town,sh.district].filter(Boolean).join(' · ')||'Sri Lanka')+'</p><div class="shop-meta">'+meta+'</div><button class="btn soft" onclick="showShop(\\''+plEscape(name).replace(/'/g,"&#39;")+'\\')">'+action+'</button></article>');
+  const safeName=plEscape(name).replace(/'/g,'&#39;');
+  cards.push('<article class="shop-card">'+banner+'<div class="shop-avatar'+(logo?' has-logo':'')+'"><span>'+plEscape(initials)+'</span>'+logo+'</div><h3>'+plEscape(name)+'</h3><p>'+plEscape([sh.town,sh.district].filter(Boolean).join(' · ')||'Sri Lanka')+'</p><div class="shop-meta">'+meta+'</div><button class="btn soft" onclick="showShop(\\''+safeName+'\\')">'+action+'</button></article>');
  });
  samples.forEach(name=>{
-  const items=products.filter(p=>!p.live&&p.seller===name),district=items[0]?.district||'',initials=name.split(/\\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
-  cards.push('<article class="shop-card"><div class="shop-avatar">'+plEscape(initials)+'</div><h3>'+plEscape(name)+'</h3><p>Sample seller storefront · '+plEscape(district)+'</p><div class="shop-meta"><span>'+items.length+' sample phones</span><span>Preview shop</span></div><button class="btn soft" onclick="showShop(\\''+plEscape(name).replace(/'/g,"&#39;")+'\\')">Visit shop →</button></article>');
+  const items=products.filter(p=>!p.live&&p.seller===name),district=items[0]?.district||'',initials=name.split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
+  const safeName=plEscape(name).replace(/'/g,'&#39;');
+  cards.push('<article class="shop-card"><div class="shop-avatar">'+plEscape(initials)+'</div><h3>'+plEscape(name)+'</h3><p>Sample seller storefront · '+plEscape(district)+'</p><div class="shop-meta"><span>'+items.length+' sample phones</span><span>Preview shop</span></div><button class="btn soft" onclick="showShop(\\''+safeName+'\\')">Visit shop →</button></article>');
  });
  grid.innerHTML=cards.length?cards.join(''):'<div class="empty" style="grid-column:1/-1">No shops match that search. Try another shop name or location.</div>';
 }
