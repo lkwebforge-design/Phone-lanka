@@ -75,7 +75,7 @@ window.plSelectPlan=async(code,existingShop=false)=>{
  selectedPlanCode=code;
  if(existingShop&&shop){
   try{
-   const r=await db.from('seller_subscriptions').update({plan_code:code,plan_selected:true}).eq('shop_id',shop.id).eq('status','pending').select('id').maybeSingle();
+   const r=await db.from('seller_subscriptions').update({plan_code:code,plan_selected:true}).eq('shop_id',shop.id).select('id').maybeSingle();
    if(r.error)throw r.error;
    if(!r.data)throw new Error('Your pending subscription could not be updated. Please refresh and try again.');
    await dashboard();
