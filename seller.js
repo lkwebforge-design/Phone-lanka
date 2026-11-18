@@ -2,9 +2,9 @@
 (()=>{
 'use strict';
 const db=window.supabase.createClient('https://ivacdswettainjderwwz.supabase.co','sb_publishable_BSGXyRFXfusvraBcA-nU0g_xxQqcyYe',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,flowType:'pkce'}});
-let shop=null,items=[],live={},businessName='',subscription=null,selectedPlanCode='starter';
+let shop=null,items=[],live={},businessName='',subscription=null,selectedPlanCode='starter',queenBeePreview=false;
 const PLAN_LIMITS={starter:{phones:10,photos:2,price:'$1',label:'Starter'},premium:{phones:25,photos:4,price:'$13.50/month',label:'Premium'}};
-const planLimits=()=>shop?.billing_grandfathered?{phones:10,photos:2}:((PLAN_LIMITS[subscription?.plan_code]||PLAN_LIMITS.starter));
+const planLimits=()=>shop?.billing_grandfathered||queenBeePreview?{phones:10,photos:2}:((PLAN_LIMITS[subscription?.plan_code]||PLAN_LIMITS.starter));
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const msg=(s,bad=false)=>{const n=document.getElementById('plStatus');if(n){n.textContent=s;n.hidden=!s;n.style.color=bad?'#b42318':'#174b83';}};
 function notify(message,type='success'){
@@ -93,8 +93,8 @@ async function dashboard(){
   if(!subscription||!subscription.plan_selected){planPicker(true);return;}
   const previewLookup=await db.from('public_shop_directory').select('id').eq('id',s.id).maybeSingle();
   if(previewLookup.error)throw previewLookup.error;
-  const queenBeeStarterPreview=!!previewLookup.data&&subscription.plan_code==='starter'&&subscription.status==='pending'&&subscription.plan_selected===true;
-  if(!queenBeeStarterPreview&&(subscription.status!=='active'||!subscription.starts_at||new Date(subscription.starts_at)>new Date()||(subscription.ends_at&&new Date(subscription.ends_at)<=new Date()))){
+  queenBeePreview=!!previewLookup.data&&subscription.status==='pending'&&subscription.plan_selected===true;
+  if(!queenBeePreview&&(subscription.status!=='active'||!subscription.starts_at||new Date(subscription.starts_at)>new Date()||(subscription.ends_at&&new Date(subscription.ends_at)<=new Date()))){
    const plan=PLAN_LIMITS[subscription.plan_code]||PLAN_LIMITS.starter;
    openModal('Payment required to activate your shop',`<div class="pl-panel">
     <div class="pl-shop-state"><b>Payment pending · ${esc(plan.label)}</b><small>Your shop is not publicly visible and you cannot publish phone listings yet.</small></div>
@@ -110,7 +110,7 @@ async function dashboard(){
  const r=await db.from('phone_listings').select('*').eq('shop_id',s.id).order('created_at',{ascending:false});if(r.error)throw r.error;items=r.data||[];
  openModal('Seller dashboard',`<div class="pl-panel">
  <div class="pl-account-line"><b>${esc(s.shop_name)}</b><button class="pl-link" onclick="plSignOut()">Log out</button></div>
- ${queenBeeStarterPreview?'<div class="pl-shop-state"><b>Queen bee preview · Payment pending</b><small>Special preview access: you can add up to 10 phones with 2 photos each without payment. Listings remain subject to PhoneLanka review.</small></div>':''}
+ ${queenBeePreview?'<div class="pl-shop-state"><b>Queen bee preview · Payment pending</b><small>Special preview access: you can add up to 10 phones with 2 photos each without payment. Listings remain subject to PhoneLanka review.</small></div>':''}
  <div class="pl-shop-state"><b>${s.status==='active'?'Active shop':s.status==='suspended'?'Suspended':'Pending review'}</b><small>${s.status==='active'?'Your shop can appear publicly.':'Your shop and listings stay hidden until approved.'}</small></div>
  <div class="pl-dash-stats"><div><b>${items.length}/${limits.phones}</b><small>Phone slots</small></div><div><b>${items.filter(x=>x.status==='active').length}</b><small>Live</small></div><div><b>${items.filter(x=>x.status==='pending').length}</b><small>Pending</small></div></div>
  <div class="pl-dash-section"><h3>Shop details</h3>${shopForm(s)}</div>
