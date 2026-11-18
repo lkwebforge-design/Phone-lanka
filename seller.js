@@ -90,7 +90,7 @@ async function dashboard(){
  if(!s.billing_grandfathered){
   const sub=await db.from('seller_subscriptions').select('*').eq('shop_id',s.id).maybeSingle();if(sub.error)throw sub.error;subscription=sub.data;
   if(!subscription||!subscription.plan_selected){planPicker(true);return;}
-  if(subscription.status!=='active'||(subscription.ends_at&&new Date(subscription.ends_at)<=new Date())){
+  if(subscription.status!=='active'||!subscription.starts_at||new Date(subscription.starts_at)>new Date()||(subscription.ends_at&&new Date(subscription.ends_at)<=new Date())){
    const plan=PLAN_LIMITS[subscription.plan_code]||PLAN_LIMITS.starter;
    openModal('Payment required to activate your shop',`<div class="pl-panel">
     <div class="pl-shop-state"><b>Payment pending · ${esc(plan.label)}</b><small>Your shop is not publicly visible and you cannot publish phone listings yet.</small></div>
