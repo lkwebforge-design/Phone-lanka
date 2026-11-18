@@ -270,12 +270,12 @@ function renderShops(){
   const meta=isClosed?'<span>Temporarily closed</span><span>Renewal required</span>':'<span>'+items.length+' listed phone'+(items.length===1?'':'s')+'</span><span>Seller shop</span>';
   const action=isClosed?'View shop status →':'Visit shop →';
   const safeName=plEscape(name).replace(/'/g,'&#39;');
-  cards.push('<article class="shop-card">'+banner+'<div class="shop-avatar'+(logo?' has-logo':'')+'"><span>'+plEscape(initials)+'</span>'+logo+'</div><h3>'+plEscape(name)+'</h3><p>'+plEscape([sh.town,sh.district].filter(Boolean).join(' · ')||'Sri Lanka')+'</p><div class="shop-meta">'+meta+'</div><button class="btn soft" onclick="showShop(\\''+safeName+'\\')">'+action+'</button></article>');
+  cards.push('<article class="shop-card">'+banner+'<div class="shop-avatar'+(logo?' has-logo':'')+'"><span>'+plEscape(initials)+'</span>'+logo+'</div><h3>'+plEscape(name)+'</h3><p>'+plEscape([sh.town,sh.district].filter(Boolean).join(' · ')||'Sri Lanka')+'</p><div class="shop-meta">'+meta+'</div><button class="btn soft" onclick="showShop(&quot;'+safeName+'&quot;)">'+action+'</button></article>');
  });
  samples.forEach(name=>{
   const items=products.filter(p=>!p.live&&p.seller===name),district=items[0]?.district||'',initials=name.split(/\s+/).map(x=>x[0]).slice(0,2).join('').toUpperCase();
   const safeName=plEscape(name).replace(/'/g,'&#39;');
-  cards.push('<article class="shop-card"><div class="shop-avatar">'+plEscape(initials)+'</div><h3>'+plEscape(name)+'</h3><p>Sample seller storefront · '+plEscape(district)+'</p><div class="shop-meta"><span>'+items.length+' sample phones</span><span>Preview shop</span></div><button class="btn soft" onclick="showShop(\\''+safeName+'\\')">Visit shop →</button></article>');
+  cards.push('<article class="shop-card"><div class="shop-avatar">'+plEscape(initials)+'</div><h3>'+plEscape(name)+'</h3><p>Sample seller storefront · '+plEscape(district)+'</p><div class="shop-meta"><span>'+items.length+' sample phones</span><span>Preview shop</span></div><button class="btn soft" onclick="showShop(&quot;'+safeName+'&quot;)">Visit shop →</button></article>');
  });
  grid.innerHTML=cards.length?cards.join(''):'<div class="empty" style="grid-column:1/-1">No shops match that search. Try another shop name or location.</div>';
 }
